@@ -12,9 +12,9 @@ const handleAuth = (req, res, next) => {
 
     if (!authToken || authToken.split(' ')[1] !== apiToken) {
         return res.status(401)
-        .json({ error: 'Unauthorized Request'});
+            .json({ error: 'Unauthorized Request' });
     }
-    
+
     next();
 }
 
@@ -54,7 +54,7 @@ const curateResponse = (req, res) => {
 
     // do not accept lack of query ?
     if (!genre && !country && !avg_vote) {
-        res.status(400).send('Please provide at least one query!');
+        res.status(400).json({ error: 'Please provide at least one query!' });
     } else {
         genre ?
             response = searchByTerm(response, 'genre', genre)
@@ -69,7 +69,7 @@ const curateResponse = (req, res) => {
             !Number.isNaN(vote) ?
                 response = searchByVote(response, vote)
                 :
-                res.status(400).send('Average vote must be a number!')
+                res.status(400).json({ error: 'Average vote must be a number!' })
             : response;
 
         response.length === 0 ?
