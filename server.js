@@ -5,25 +5,79 @@ const cors = require('cors');
 const helmet = require('helmet');
 const movies = require('./movies-data-small');
 
+const handleAuth = (req, res, next) => {
+    // verifies auth token
+    const apiToken = process.env.API_TOKEN;
+    const authToken = req.get('Authorization');
+
+    if (!authToken || authToken.split(' ')[1] !== apiToken) {
+        return res.status(401)
+        .json({ error: 'Unauthorized Request'});
+    }
+    
+    next();
+}
+
 const app = express();
 app.use(morgan('dev'));
 app.use(helmet());
 app.use(cors());
-
-const handleAuth = (req, res, next) => {
-    // verifies auth token
-}
+app.use(handleAuth);
 
 const searchByTerm = (store, searchType, searchTerm) => {
     // handles search type and uses term to return filtered array
+    searchTerm = searchTerm.toLowerCase();
+
+    const filtered = store
+        .filter(mov => {
+            const type = mov[searchType].toLowerCase();
+            return type.includes(searchTerm);
+        });
+
+    return filtered;
 }
 
 const searchByVote = (store, avgVote) => {
     // handles search # and uses number to return filtered array
+    const filtered = store
+        .filter(mov => mov.avg_vote >= avgVote);
+
+    return filtered;
 }
 
 const curateResponse = (req, res) => {
-    res.send('Hellooooo, Express!');
+    // start with the whole dang store
+    let response = movies;
+
+    // deconstruct queries
+    const { genre, country, avg_vote } = req.query;
+
+    // do not accept lack of query ?
+    if (!genre && !country && !avg_vote) {
+        res.status(400).send('Please provide at least one query!');
+    } else {
+        genre ?
+            response = searchByTerm(response, 'genre', genre)
+            : response;
+
+        country ?
+            response = searchByTerm(response, 'country', country)
+            : response;
+
+        const vote = parseInt(avg_vote);
+        avg_vote ?
+            !Number.isNaN(vote) ?
+                response = searchByVote(response, vote)
+                :
+                res.status(400).send('Average vote must be a number!')
+            : response;
+
+        response.length === 0 ?
+            response = 'Sorry! No results found, please try again.'
+            : response;
+
+        res.status(200).json(response);
+    }
 }
 
 app.get('/movie', curateResponse);
