@@ -1,10 +1,7 @@
-# EXPRESS BOILERPLATE
+# MOVIEDEX API
 
-## Get your Express project up and running easily with this boilerplate
+## Setting up a server created to handle large sets of data
 
-### Includes:
-*NodeMon* (dev server that auto-refreshes when changes are made)
-*Morgan* (real-time notifications of requests in the terminal)
-*Cors* (prevents CORS errors with simple requests)
-*Helmet* (protects sensitive header information)
-*Dotenv* (imports from the .env file to process.env object for access)
+### This code ensures our client will only receive the data they have searched for, & will not have to load the initial data and filter client-side, which would make the app run slower and have longer download times.
+
+_Dotenv_ is utilized in this code and will need to be set up for code to run successfully.
