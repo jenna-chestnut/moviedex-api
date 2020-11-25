@@ -52,26 +52,32 @@ const curateResponse = (req, res) => {
     // deconstruct queries
     const { genre, country, avg_vote } = req.query;
 
-    // do not accept lack of query ?
+    // do not accept lack of query 
     if (!genre && !country && !avg_vote) {
         res.status(400).json({ error: 'Please provide at least one query!' });
+        
     } else {
+        //does genre query exist? if so, run a search, otherwise do nothing
         genre ?
             response = searchByTerm(response, 'genre', genre)
             : response;
 
+        //does country query exist? if so, run a search, otherwise do nothing
         country ?
             response = searchByTerm(response, 'country', country)
             : response;
 
+        //does avg vote query exist? if so, attempt to run a search, otherwise do nothing
         const vote = parseInt(avg_vote);
         avg_vote ?
+            // only run a search if number is valid - throw error otherwise
             !Number.isNaN(vote) ?
                 response = searchByVote(response, vote)
-                :
+                : 
                 res.status(400).json({ error: 'Average vote must be a number!' })
             : response;
 
+        //if nothing matches a search, send a message instead of empty array
         response.length === 0 ?
             response = 'Sorry! No results found, please try again.'
             : response;
